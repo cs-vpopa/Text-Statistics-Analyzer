@@ -36,11 +36,21 @@ public class TextAnalyzerApp {
         }
 
         public void setTop(int top) {
-            this.top = top;
+            if(top > 0){
+                this.top = top;
+        }else {
+                setValid(false);
+                setErrorMessage("Top must be a positive integer.");
+            }
         }
 
         public void setPhraseSize(int phraseSize) {
-            this.phraseSize = phraseSize;
+            if(phraseSize > 1){
+                this.phraseSize = phraseSize;
+            }else{
+                setValid(false);
+                setErrorMessage("Phrase size must be greater than 1.");
+            }
         }
 
         public void setValid(boolean valid) {
@@ -78,7 +88,7 @@ public class TextAnalyzerApp {
                             config.setTop(Integer.parseInt(args[++i]));
                         } catch (NumberFormatException e) {
                             config.setValid(false);
-                            config.setErrorMessage("Invalid number for -top.");
+                            config.setErrorMessage("Top must be a positive integer.");
                         }
                     } else {
                         config.setValid(false);
@@ -92,7 +102,7 @@ public class TextAnalyzerApp {
                             config.setPhraseSize(Integer.parseInt(args[++i]));
                         } catch (NumberFormatException e) {
                             config.setValid(false);
-                            config.setErrorMessage("Invalid number for -phraseSize.");
+                            config.setErrorMessage("Phrase size must be a number greater than 1.");
                         }
                     } else {
                         config.setValid(false);
