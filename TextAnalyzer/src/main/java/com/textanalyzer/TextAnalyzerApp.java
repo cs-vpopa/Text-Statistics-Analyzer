@@ -36,18 +36,18 @@ public class TextAnalyzerApp {
         }
 
         public void setTop(int top) {
-            if(top > 0){
+            if (top > 0) {
                 this.top = top;
-        }else {
+            } else {
                 setValid(false);
                 setErrorMessage("Top must be a positive integer.");
             }
         }
 
         public void setPhraseSize(int phraseSize) {
-            if(phraseSize > 1){
+            if (phraseSize > 1) {
                 this.phraseSize = phraseSize;
-            }else{
+            } else {
                 setValid(false);
                 setErrorMessage("Phrase size must be greater than 1.");
             }
@@ -64,6 +64,7 @@ public class TextAnalyzerApp {
 
     /**
      * Parses command-line arguments to configure the application.
+     *
      * @param args The command-line arguments.
      * @return The configuration derived from the arguments.
      */
@@ -121,6 +122,7 @@ public class TextAnalyzerApp {
 
     /**
      * Reads the entire content of a text file into a String.
+     *
      * @param filePath The path to the text file.
      * @return The content of the file.
      */
@@ -135,6 +137,7 @@ public class TextAnalyzerApp {
 
     /**
      * Counts the number of words and sentences in the text content.
+     *
      * @param content The text content to analyze.
      * @return A map with counts for words and sentences.
      */
@@ -155,7 +158,8 @@ public class TextAnalyzerApp {
 
     /**
      * Identifies and counts the frequency of each phrase of a given size in the text.
-     * @param content The text content to analyze.
+     *
+     * @param content    The text content to analyze.
      * @param phraseSize The number of words in each phrase.
      * @return A map of phrases to their frequency count.
      */
@@ -178,8 +182,9 @@ public class TextAnalyzerApp {
 
     /**
      * Retrieves the top N phrases sorted by frequency.
+     *
      * @param phraseCounts A map of phrases to their frequency count.
-     * @param top The number of top phrases to retrieve.
+     * @param top          The number of top phrases to retrieve.
      * @return A list of the top N phrases and their counts.
      */
     public static List<Map.Entry<String, Integer>> getTopPhrases(Map<String, Integer> phraseCounts, int top) {
@@ -189,8 +194,47 @@ public class TextAnalyzerApp {
         return sortedPhrases.subList(0, Math.min(top, sortedPhrases.size()));
     }
 
-    public static void main(String[] args) {
+    public static String formatAsTable(List<Map.Entry<String, Integer>> topPhrases) {
+        StringBuilder table = new StringBuilder();
+        // Assume the phrase is no longer than 30 characters, adjust if needed
+        String rowFormat = "| %-30s | %5d |\n";
 
+        // Create the header
+        table.append("+--------------------------------+-------+\n");
+        table.append(String.format("| %-30s | %5s |\n", "Phrase", "Count"));
+        table.append("+--------------------------------+-------+\n");
+
+        // Create rows for each phrase
+        for (Map.Entry<String, Integer> entry : topPhrases) {
+            table.append(String.format(rowFormat, entry.getKey(), entry.getValue()));
+        }
+
+        // Footer separator
+        table.append("+--------------------------------+-------+\n");
+
+        return table.toString();
+    }
+
+    public static String formatWordAndSentenceCounts(Map<String, Integer> counts) {
+        String headerFormat = "+----------------------+-------+\n" +
+                "| %-20s | %5s |\n" +
+                "+----------------------+-------+\n";
+        String rowFormat = "| %-20s | %5d |\n" +
+                "+----------------------+-------+\n";
+        StringBuilder table = new StringBuilder();
+
+        // Header
+        table.append(String.format(headerFormat, "Type", "Count"));
+
+        // Rows for word and sentence counts
+        table.append(String.format(rowFormat, "Number of words", counts.getOrDefault("words", 0)));
+        table.append(String.format(rowFormat, "Number of sentences", counts.getOrDefault("sentences", 0)));
+
+        return table.toString();
+    }
+
+
+    public static void main(String[] args) {
         Config config = parseArguments(args);
 
         if (config.isValid()) {
@@ -199,17 +243,17 @@ public class TextAnalyzerApp {
             if (fileContent != null) {
                 // Display word and sentence counts.
                 Map<String, Integer> counts = countWordsAndSentences(fileContent);
-                System.out.println("Number of words: " + counts.get("words"));
-                System.out.println("Number of sentences: " + counts.get("sentences"));
+                String formattedWordAndSentenceCounts = formatWordAndSentenceCounts(counts);
+                System.out.println(formattedWordAndSentenceCounts);
 
                 // Perform phrase frequency analysis and display top phrases.
                 Map<String, Integer> phraseCounts = getPhraseFrequency(fileContent, config.phraseSize);
                 List<Map.Entry<String, Integer>> topPhrases = getTopPhrases(phraseCounts, config.top);
 
+                // Format and output the top phrases table
+                String formattedTable = formatAsTable(topPhrases);
                 System.out.println("Top phrases:");
-                for (Map.Entry<String, Integer> entry : topPhrases) {
-                    System.out.println(entry.getKey() + ": " + entry.getValue());
-                }
+                System.out.println(formattedTable);
             } else {
                 // Handle file read error.
                 System.out.println("Error: Unable to read the file content.");
